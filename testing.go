@@ -8,12 +8,25 @@ import (
 
 // BackendTestSuite provides a standard test suite for Backend implementations.
 // Backend implementations should call RunBackendTests with their implementation.
+//
+// Example usage in a backend implementation:
+//
+//	func TestMemory_BackendContract(t *testing.T) {
+//		suite := cache.BackendTestSuite{
+//			NewBackend: func(t *testing.T) cache.Backend {
+//				return NewMemory()
+//			},
+//		}
+//		cache.RunBackendTests(t, suite)
+//	}
 type BackendTestSuite struct {
 	// NewBackend creates a new backend instance for testing.
 	NewBackend func(t *testing.T) Backend
 }
 
 // RunBackendTests runs the complete backend test suite.
+// This validates that a Backend implementation correctly implements
+// the contract defined by the Backend interface.
 func RunBackendTests(t *testing.T, suite BackendTestSuite) {
 	t.Run("Get", func(t *testing.T) { testBackendGet(t, suite) })
 	t.Run("Set", func(t *testing.T) { testBackendSet(t, suite) })
