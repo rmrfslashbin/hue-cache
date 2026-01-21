@@ -124,6 +124,11 @@ func (kb *KeyBuilder) AllScenes() string {
 	return "scene:*"
 }
 
+// AllGroupedLights returns the pattern for all grouped light keys.
+func (kb *KeyBuilder) AllGroupedLights() string {
+	return "grouped_light:*"
+}
+
 // AllResources returns the pattern for all resource types.
 func (kb *KeyBuilder) AllResources(resourceType string) string {
 	return resourceType + ":*"
