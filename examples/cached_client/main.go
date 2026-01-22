@@ -9,6 +9,7 @@ import (
 	cache "github.com/rmrfslashbin/hue-cache"
 	"github.com/rmrfslashbin/hue-cache/backends"
 	"github.com/rmrfslashbin/hue-sdk"
+	"github.com/rmrfslashbin/hue-sdk/resources"
 )
 
 func main() {
@@ -80,8 +81,8 @@ func main() {
 		lightID := lights[0].ID
 		fmt.Printf("\nUpdating light %s...\n", lightID)
 
-		err := cachedClient.Lights().Update(ctx, lightID, hue.LightUpdate{
-			On: &hue.OnState{On: true},
+		err := cachedClient.Lights().Update(ctx, lightID, resources.LightUpdate{
+			On: &resources.OnState{On: true},
 		})
 		if err != nil {
 			log.Fatal(err)

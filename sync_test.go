@@ -12,8 +12,10 @@ import (
 
 // mockBackend is a simple in-memory backend for testing.
 type mockBackend struct {
-	mu   sync.RWMutex
-	data map[string]*Entry
+	mu     sync.RWMutex
+	data   map[string]*Entry
+	hits   int64
+	misses int64
 }
 
 func newMockBackend() *mockBackend {
@@ -28,8 +30,10 @@ func (m *mockBackend) Get(ctx context.Context, key string) (*Entry, error) {
 
 	entry, ok := m.data[key]
 	if !ok {
+		m.misses++
 		return nil, ErrNotFound
 	}
+	m.hits++
 	return entry.Clone(), nil
 }
 
@@ -63,9 +67,27 @@ func (m *mockBackend) Keys(ctx context.Context, pattern string) ([]string, error
 
 	var keys []string
 	for k := range m.data {
-		keys = append(keys, k)
+		if matchPattern(pattern, k) {
+			keys = append(keys, k)
+		}
 	}
 	return keys, nil
+}
+
+// matchPattern implements simple glob pattern matching
+func matchPattern(pattern, str string) bool {
+	if pattern == "*" {
+		return true
+	}
+	if pattern == str {
+		return true
+	}
+	// Handle patterns like "light:*"
+	if len(pattern) > 0 && pattern[len(pattern)-1] == '*' {
+		prefix := pattern[:len(pattern)-1]
+		return len(str) >= len(prefix) && str[:len(prefix)] == prefix
+	}
+	return false
 }
 
 func (m *mockBackend) Stats(ctx context.Context) (*Stats, error) {
@@ -74,6 +96,8 @@ func (m *mockBackend) Stats(ctx context.Context) (*Stats, error) {
 
 	return &Stats{
 		Entries: int64(len(m.data)),
+		Hits:    m.hits,
+		Misses:  m.misses,
 	}, nil
 }
 
